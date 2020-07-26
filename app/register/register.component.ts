@@ -25,13 +25,19 @@ export class RegisterComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.registerForm = this.formBuilder.group({
-      firstName: ["", Validators.required],
-      lastName: ["", Validators.required],
-      username: ["", Validators.required],
-      email: ["", Validators.required],
-      password: ["", [Validators.required, Validators.minLength(6)]]
-    });
+    this.registerForm = this.formBuilder.group(
+      {
+        firstName: ["", Validators.required],
+        lastName: ["", Validators.required],
+        username: ["", Validators.required],
+        email: ["", [Validators.required,Validators.pattern('^[a-zA-Z0-9.!#$%&’*+=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$')]],
+        confirmpassword: ["", [Validators.required, Validators.minLength(6)]],
+        password: ["", [Validators.required, Validators.minLength(6)]]
+      },
+      {
+        validators: this.password.bind(this)
+      }
+    );
   }
 
   // convenience getter for easy access to form fields
@@ -39,6 +45,18 @@ export class RegisterComponent implements OnInit {
     return this.registerForm.controls;
   }
 
+  isConfirmPassword: boolean = false;
+  changePassword() {
+    this.isConfirmPassword = false;
+    console.log( this.registerForm.get("password").value !=
+      this.registerForm.get("confirmpassword").value)
+    if (
+      this.registerForm.get("password").value !=
+      this.registerForm.get("confirmpassword").value
+    ) {
+      this.isConfirmPassword = true;
+    }
+  }
   onSubmit() {
     this.submitted = true;
 
@@ -61,5 +79,12 @@ export class RegisterComponent implements OnInit {
           this.loading = false;
         }
       );
+  }
+
+  password(formGroup: FormGroup) {
+    const { value: password } = formGroup.get("password");
+    const { value: confirmPassword } = formGroup.get("confirmpassword");
+    console.log(password, "", confirmPassword);
+    return password === confirmPassword ? null : { passwordNotMatch: true };
   }
 }
